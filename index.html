@@ -22,6 +22,8 @@
       --umber:        #5e4a32;
       --gold:         #b88840;
       --border:       rgba(28, 22, 17, 0.12);
+      --pad-x:        clamp(1.5rem, 5vw, 6rem);
+      --maxw:         1340px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,7 +44,6 @@
       position: relative;
     }
 
-    /* Paper grain overlay */
     body::before {
       content: '';
       position: fixed;
@@ -54,14 +55,13 @@
       mix-blend-mode: multiply;
     }
 
-    /* Vignette for warmth */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 2;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(28, 22, 17, 0.12) 100%);
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(28, 22, 17, 0.10) 100%);
     }
 
     main { position: relative; z-index: 3; }
@@ -69,20 +69,21 @@
     /* ====== SECTION 1: HERO / BOOK ====== */
     .hero {
       min-height: 100vh;
-      padding: 4rem 6rem 6rem;
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: clamp(4.5rem, 9vh, 7rem) var(--pad-x) clamp(3rem, 6vh, 5rem);
       display: grid;
-      grid-template-columns: 1fr 1.1fr;
-      gap: 6rem;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: clamp(3rem, 5vw, 5.5rem);
       align-items: center;
       position: relative;
     }
 
-    /* Subtle ornament in corner */
     .hero::before {
       content: '';
       position: absolute;
-      top: 3rem;
-      right: 3rem;
+      top: clamp(2rem, 4vh, 3rem);
+      right: var(--pad-x);
       width: 60px;
       height: 1px;
       background: var(--ink);
@@ -91,8 +92,8 @@
 
     .hero-meta {
       position: absolute;
-      top: 3rem;
-      left: 6rem;
+      top: clamp(2rem, 4vh, 3rem);
+      left: var(--pad-x);
       font-family: 'Fraunces', serif;
       font-size: 0.75rem;
       letter-spacing: 0.25em;
@@ -106,46 +107,148 @@
       margin-right: 0.5em;
     }
 
+    /* ====== 3D BOOK ====== */
     .book-stage {
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 2rem;
-      animation: rise 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 1.5rem 1rem;
+      perspective: 2400px;
+      perspective-origin: 50% 40%;
     }
 
-    .book-cover {
-      width: 100%;
-      max-width: 380px;
-      aspect-ratio: 2/3;
+    /* Ground shadow */
+    .book-stage::after {
+      content: '';
+      position: absolute;
+      bottom: 8%;
+      left: 50%;
+      width: 58%;
+      height: 26px;
+      transform: translateX(-55%);
+      background: radial-gradient(ellipse at center, rgba(28,22,17,0.40), rgba(28,22,17,0) 70%);
+      filter: blur(10px);
+      z-index: 0;
+    }
+
+    .book3d {
+      --bw: 300px;   /* ancho del libro  */
+      --bh: 450px;   /* alto del libro (2:3) */
+      --bd: 42px;    /* grosor / lomo */
+      position: relative;
+      width: var(--bw);
+      height: var(--bh);
+      transform-style: preserve-3d;
+      transform: rotateY(-26deg) rotateX(3deg);
+      transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: book-in 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1;
+    }
+
+    .book3d:hover {
+      transform: rotateY(-12deg) rotateX(2deg);
+    }
+
+    .book3d .face {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Front cover */
+    .book3d .front {
+      width: var(--bw);
+      height: var(--bh);
+      transform: translateZ(calc(var(--bd) / 2));
+      border-radius: 2px 5px 5px 2px;
+      overflow: hidden;
       background: linear-gradient(135deg, #2a1f15 0%, #1a120a 100%);
       box-shadow:
-        0 1px 2px rgba(28, 22, 17, 0.15),
-        0 8px 24px rgba(28, 22, 17, 0.25),
-        0 30px 60px rgba(28, 22, 17, 0.35),
-        inset 0 0 60px rgba(0, 0, 0, 0.3);
-      position: relative;
-      transform: rotate(-2deg);
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        inset -6px 0 14px rgba(0,0,0,0.35),
+        inset 2px 0 4px rgba(255,255,255,0.08);
     }
 
-    .book-cover:hover {
-      transform: rotate(0deg) translateY(-8px);
-    }
-
-    .book-cover img {
+    .book3d .front img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    /* Placeholder content for book cover when no image */
+    /* Sheen over the cover */
+    .book3d .front::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 22%, rgba(255,255,255,0) 78%, rgba(0,0,0,0.18) 100%);
+      pointer-events: none;
+    }
+
+    /* Back cover */
+    .book3d .back {
+      width: var(--bw);
+      height: var(--bh);
+      transform: rotateY(180deg) translateZ(calc(var(--bd) / 2));
+      border-radius: 2px 5px 5px 2px;
+      background: linear-gradient(135deg, #241a11, #140d07);
+    }
+
+    /* Pages — right edge */
+    .book3d .pages {
+      width: var(--bd);
+      height: calc(var(--bh) - 6px);
+      top: 3px;
+      left: calc((var(--bw) - var(--bd)) / 2);
+      transform: rotateY(90deg) translateZ(calc(var(--bw) / 2));
+      background:
+        repeating-linear-gradient(to right,
+          #efe7d3 0px, #efe7d3 1px,
+          #c9bd9d 1px, #c9bd9d 2.5px),
+        linear-gradient(to right, #f6efdd, #d9cdae);
+      background-color: #e8dfca;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.15);
+    }
+
+    /* Spine — left edge */
+    .book3d .spine {
+      width: var(--bd);
+      height: var(--bh);
+      left: calc((var(--bw) - var(--bd)) / 2);
+      transform: rotateY(-90deg) translateZ(calc(var(--bw) / 2));
+      background: linear-gradient(to right, #0e0905 0%, #241812 55%, #1a120a 100%);
+      border-radius: 2px 0 0 2px;
+      box-shadow: inset -4px 0 8px rgba(0,0,0,0.4);
+    }
+
+    /* Top edge (head) */
+    .book3d .top {
+      width: var(--bw);
+      height: var(--bd);
+      top: calc((var(--bh) - var(--bd)) / 2);
+      transform: rotateX(90deg) translateZ(calc(var(--bh) / 2));
+      background:
+        repeating-linear-gradient(to bottom,
+          #f1e9d6 0px, #f1e9d6 1px,
+          #d2c6a8 1px, #d2c6a8 2.5px),
+        linear-gradient(to bottom, #f6efdd, #ddd1b3);
+      background-color: #ece3ce;
+    }
+
+    /* Bottom edge */
+    .book3d .bottom {
+      width: var(--bw);
+      height: var(--bd);
+      top: calc((var(--bh) - var(--bd)) / 2);
+      transform: rotateX(-90deg) translateZ(calc(var(--bh) / 2));
+      background: linear-gradient(to bottom, #d8ccae, #c3b691);
+    }
+
+    /* Cover placeholder (when image not found) */
     .book-cover-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
+      position: absolute;
+      inset: 0;
+      display: none;
       flex-direction: column;
       justify-content: space-between;
       padding: 3rem 2rem;
@@ -153,41 +256,12 @@
       text-align: center;
       font-family: 'Fraunces', serif;
     }
+    .book-cover-placeholder .ornament { font-size: 1.5rem; opacity: 0.6; letter-spacing: 0.5em; }
+    .book-cover-placeholder .title { font-size: 1.5rem; font-weight: 400; line-height: 1.2; font-style: italic; }
+    .book-cover-placeholder .author { font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.85; }
 
-    .book-cover-placeholder .ornament {
-      font-size: 1.5rem;
-      opacity: 0.6;
-      letter-spacing: 0.5em;
-    }
-
-    .book-cover-placeholder .title {
-      font-size: 1.5rem;
-      font-weight: 400;
-      line-height: 1.2;
-      font-style: italic;
-    }
-
-    .book-cover-placeholder .author {
-      font-size: 0.75rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      opacity: 0.85;
-    }
-
-    /* Book spine effect */
-    .book-cover::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 6px;
-      background: linear-gradient(to right, rgba(0,0,0,0.4), transparent);
-    }
-
-    .hero-text {
-      animation: slideIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-    }
+    /* ====== HERO TEXT ====== */
+    .hero-text { animation: slideIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
 
     .eyebrow {
       font-family: 'Fraunces', serif;
@@ -195,98 +269,71 @@
       letter-spacing: 0.4em;
       text-transform: uppercase;
       color: var(--terracotta);
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
       font-weight: 600;
       display: flex;
       align-items: center;
       gap: 1rem;
     }
-
-    .eyebrow::before {
-      content: '';
-      width: 32px;
-      height: 1px;
-      background: var(--terracotta);
-    }
+    .eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--terracotta); }
 
     h1 {
       font-family: 'Fraunces', serif;
       font-weight: 400;
-      font-size: clamp(2.5rem, 5vw, 4.2rem);
-      line-height: 1.02;
+      font-size: clamp(2.5rem, 4.5vw, 4rem);
+      line-height: 1.03;
       letter-spacing: -0.02em;
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
       color: var(--ink);
       font-variation-settings: 'opsz' 144, 'SOFT' 30;
     }
-
-    h1 em {
-      font-style: italic;
-      color: var(--terracotta);
-      font-weight: 400;
-    }
+    h1 em { font-style: italic; color: var(--terracotta); font-weight: 400; }
 
     .author-line {
       font-family: 'Fraunces', serif;
       font-style: italic;
       font-size: 1.15rem;
       color: var(--ink-soft);
-      margin-bottom: 3rem;
+      margin-bottom: 2.25rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
-
-    .author-line::before {
-      content: '—';
-      color: var(--terracotta);
-    }
+    .author-line::before { content: '—'; color: var(--terracotta); }
 
     .lede {
       font-family: 'EB Garamond', serif;
       font-size: 1.2rem;
-      line-height: 1.65;
+      line-height: 1.6;
       color: var(--ink-soft);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       max-width: 32em;
-    }
-
-    .lede strong {
-      font-weight: 500;
-      color: var(--ink);
     }
 
     .pullquote {
       font-family: 'Fraunces', serif;
       font-style: italic;
-      font-size: 1.35rem;
+      font-size: 1.3rem;
       line-height: 1.4;
       color: var(--ink);
-      padding: 2rem 0 2rem 2rem;
+      padding: 1.5rem 0 1.5rem 2rem;
       border-left: 2px solid var(--terracotta);
-      margin: 2.5rem 0;
+      margin: 2rem 0 0;
       max-width: 30em;
       position: relative;
     }
-
     .pullquote::before {
       content: '"';
       position: absolute;
       left: -0.5rem;
-      top: -1rem;
+      top: -1.25rem;
       font-size: 4rem;
       color: var(--terracotta);
       opacity: 0.4;
       font-family: 'Fraunces', serif;
     }
 
-    .cta-row {
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      margin-top: 3rem;
-      flex-wrap: wrap;
-    }
+    .cta-row { display: flex; align-items: center; gap: 2rem; margin-top: 2.5rem; flex-wrap: wrap; }
 
     .cta-primary {
       display: inline-flex;
@@ -305,20 +352,9 @@
       position: relative;
       overflow: hidden;
     }
-
-    .cta-primary::after {
-      content: '→';
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      font-size: 1.1rem;
-    }
-
-    .cta-primary:hover {
-      background: var(--terracotta);
-    }
-
-    .cta-primary:hover::after {
-      transform: translateX(5px);
-    }
+    .cta-primary::after { content: '→'; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); font-size: 1.1rem; }
+    .cta-primary:hover { background: var(--terracotta); }
+    .cta-primary:hover::after { transform: translateX(5px); }
 
     .cta-secondary {
       display: inline-flex;
@@ -333,51 +369,16 @@
       padding-bottom: 2px;
       transition: all 0.3s ease;
     }
+    .cta-secondary:hover { color: var(--terracotta); border-color: var(--terracotta); }
 
-    .cta-secondary:hover {
-      color: var(--terracotta);
-      border-color: var(--terracotta);
-    }
-
-    /* Scroll indicator */
-    .scroll-down {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: 'Fraunces', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--ink-soft);
-      text-decoration: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.8rem;
-      opacity: 0.7;
-    }
-
-    .scroll-down::after {
-      content: '';
-      width: 1px;
-      height: 40px;
-      background: var(--ink-soft);
-      animation: scrollPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes scrollPulse {
-      0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
-      50% { opacity: 1; transform: scaleY(1); }
-    }
-
-    /* ====== SECTION DIVIDER ====== */
+    /* ====== DIVIDER ====== */
     .divider {
-      padding: 5rem 6rem 3rem;
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: clamp(2rem, 4vh, 3rem) var(--pad-x) 2rem;
       text-align: center;
       position: relative;
     }
-
     .divider-ornament {
       display: inline-flex;
       align-items: center;
@@ -388,27 +389,17 @@
       font-size: 0.9rem;
       letter-spacing: 0.15em;
     }
-
-    .divider-ornament::before,
-    .divider-ornament::after {
-      content: '';
-      width: 80px;
-      height: 1px;
-      background: var(--umber);
-      opacity: 0.5;
+    .divider-ornament::before, .divider-ornament::after {
+      content: ''; width: 80px; height: 1px; background: var(--umber); opacity: 0.5;
     }
 
     /* ====== SECTION 2: SUPPORT METHODS ====== */
     .methods {
-      padding: 2rem 6rem 8rem;
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 1rem var(--pad-x) clamp(5rem, 9vh, 8rem);
     }
-
-    .methods-header {
-      max-width: 760px;
-      margin: 0 auto 5rem;
-      text-align: center;
-    }
-
+    .methods-header { max-width: 760px; margin: 0 auto 3.5rem; text-align: center; }
     .methods-eyebrow {
       font-family: 'Fraunces', serif;
       font-size: 0.7rem;
@@ -418,7 +409,6 @@
       font-weight: 600;
       margin-bottom: 1.5rem;
     }
-
     h2 {
       font-family: 'Fraunces', serif;
       font-weight: 400;
@@ -429,26 +419,10 @@
       margin-bottom: 1.5rem;
       font-variation-settings: 'opsz' 144;
     }
+    h2 em { font-style: italic; color: var(--terracotta); }
+    .methods-description { font-size: 1.15rem; color: var(--ink-soft); line-height: 1.7; max-width: 38em; margin: 0 auto; }
+    .methods-description em { font-family: 'Fraunces', serif; color: var(--ink); }
 
-    h2 em {
-      font-style: italic;
-      color: var(--terracotta);
-    }
-
-    .methods-description {
-      font-size: 1.15rem;
-      color: var(--ink-soft);
-      line-height: 1.7;
-      max-width: 38em;
-      margin: 0 auto;
-    }
-
-    .methods-description em {
-      font-family: 'Fraunces', serif;
-      color: var(--ink);
-    }
-
-    /* Grid of method cards */
     .methods-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -469,226 +443,64 @@
       text-align: center;
       overflow: hidden;
     }
-
     .method-card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 3px;
       background: var(--terracotta);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .method-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(28, 22, 17, 0.1); }
+    .method-card:hover::before { transform: scaleX(1); }
 
-    .method-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(28, 22, 17, 0.1);
-    }
+    .method-number { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.85rem; color: var(--terracotta); margin-bottom: 0.5rem; letter-spacing: 0.1em; }
+    .method-name { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 500; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: -0.01em; }
+    .method-region { font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.9rem; color: var(--umber); margin-bottom: 2rem; }
 
-    .method-card:hover::before {
-      transform: scaleX(1);
-    }
-
-    .method-number {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-size: 0.85rem;
-      color: var(--terracotta);
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.1em;
-    }
-
-    .method-name {
-      font-family: 'Fraunces', serif;
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: var(--ink);
-      margin-bottom: 0.4rem;
-      letter-spacing: -0.01em;
-    }
-
-    .method-region {
-      font-family: 'EB Garamond', serif;
-      font-style: italic;
-      font-size: 0.9rem;
-      color: var(--umber);
-      margin-bottom: 2rem;
-    }
-
-    /* QR or data area */
     .qr-frame {
-      width: 180px;
-      height: 180px;
+      width: 180px; height: 180px;
       background: white;
       border: 1px solid var(--border);
       padding: 8px;
       margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       position: relative;
       box-shadow: 0 2px 8px rgba(28, 22, 17, 0.06);
     }
+    .qr-frame img { width: 100%; height: 100%; object-fit: contain; }
+    .qr-frame::before, .qr-frame::after { content: ''; position: absolute; width: 12px; height: 12px; border: 1.5px solid var(--terracotta); }
+    .qr-frame::before { top: -4px; left: -4px; border-right: none; border-bottom: none; }
+    .qr-frame::after { bottom: -4px; right: -4px; border-left: none; border-top: none; }
 
-    .qr-frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+    .qr-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-style: italic; font-size: 0.8rem; color: #aaa; text-align: center; padding: 1rem; line-height: 1.4; }
+    .qr-placeholder span { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.4; }
 
-    /* Decorative corners on QR frame */
-    .qr-frame::before,
-    .qr-frame::after {
-      content: '';
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      border: 1.5px solid var(--terracotta);
-    }
-
-    .qr-frame::before {
-      top: -4px;
-      left: -4px;
-      border-right: none;
-      border-bottom: none;
-    }
-
-    .qr-frame::after {
-      bottom: -4px;
-      right: -4px;
-      border-left: none;
-      border-top: none;
-    }
-
-    .qr-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-size: 0.8rem;
-      color: #aaa;
-      text-align: center;
-      padding: 1rem;
-      line-height: 1.4;
-    }
-
-    .qr-placeholder span {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-      opacity: 0.4;
-    }
-
-    /* Data display for non-QR methods */
-    .method-data {
-      width: 100%;
-      padding: 1.5rem 1rem;
-      background: var(--paper-soft);
-      border-radius: 2px;
-      margin-bottom: 1.5rem;
-      font-family: 'EB Garamond', serif;
-    }
-
-    .data-label {
-      font-family: 'Fraunces', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--umber);
-      margin-bottom: 0.5rem;
-    }
-
-    .data-value {
-      font-size: 1.1rem;
-      color: var(--ink);
-      font-weight: 500;
-      word-break: break-all;
-      letter-spacing: 0.02em;
-    }
-
-    .method-instruction {
-      font-family: 'EB Garamond', serif;
-      font-style: italic;
-      font-size: 0.95rem;
-      color: var(--ink-soft);
-      line-height: 1.5;
-      max-width: 22em;
-    }
+    .method-data { width: 100%; padding: 1.5rem 1rem; background: var(--paper-soft); border-radius: 2px; margin-bottom: 1.5rem; font-family: 'EB Garamond', serif; }
+    .data-label { font-family: 'Fraunces', serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--umber); margin-bottom: 0.5rem; }
+    .data-value { font-size: 1.1rem; color: var(--ink); font-weight: 500; word-break: break-all; letter-spacing: 0.02em; }
+    .method-instruction { font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.95rem; color: var(--ink-soft); line-height: 1.5; max-width: 22em; }
 
     /* ====== FOOTER ====== */
-    footer {
-      padding: 4rem 6rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      background: var(--paper-soft);
-      position: relative;
-      z-index: 3;
-    }
-
-    footer p {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-size: 1rem;
-      color: var(--ink-soft);
-      max-width: 36em;
-      margin: 0 auto 1.5rem;
-      line-height: 1.6;
-    }
-
-    .footer-signature {
-      font-family: 'Fraunces', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--umber);
-    }
-
-    .footer-signature span {
-      color: var(--terracotta);
-    }
+    footer { padding: 4rem var(--pad-x); border-top: 1px solid var(--border); text-align: center; background: var(--paper-soft); position: relative; z-index: 3; }
+    footer p { font-family: 'Fraunces', serif; font-style: italic; font-size: 1rem; color: var(--ink-soft); max-width: 36em; margin: 0 auto 1.5rem; line-height: 1.6; }
+    .footer-signature { font-family: 'Fraunces', serif; font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--umber); }
+    .footer-signature span { color: var(--terracotta); }
 
     /* ====== ANIMATIONS ====== */
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(40px) rotate(-2deg);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) rotate(-2deg);
-      }
+    @keyframes book-in {
+      from { opacity: 0; transform: rotateY(-26deg) rotateX(3deg) translateY(40px); }
+      to   { opacity: 1; transform: rotateY(-26deg) rotateX(3deg) translateY(0); }
     }
-
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Reveal on scroll */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
     .method-card.reveal:nth-child(1) { transition-delay: 0s; }
     .method-card.reveal:nth-child(2) { transition-delay: 0.1s; }
     .method-card.reveal:nth-child(3) { transition-delay: 0.2s; }
@@ -696,37 +508,22 @@
     .method-card.reveal:nth-child(5) { transition-delay: 0.4s; }
 
     /* ====== RESPONSIVE ====== */
-    @media (max-width: 1024px) {
-      .hero {
-        padding: 4rem 3rem 6rem;
-        gap: 4rem;
-      }
-      .hero-meta { left: 3rem; }
-      .methods, .divider, footer { padding-left: 3rem; padding-right: 3rem; }
+    @media (min-width: 769px) and (max-height: 820px) {
+      .hero { min-height: auto; padding-top: 6rem; padding-bottom: 4rem; }
+      .book3d { --bw: 260px; --bh: 390px; --bd: 38px; }
+      h1 { font-size: clamp(2.3rem, 4vw, 3.4rem); }
     }
 
     @media (max-width: 768px) {
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 5rem 1.5rem 4rem;
-        min-height: auto;
-        gap: 3rem;
-      }
-      .hero-meta {
-        left: 1.5rem;
-        top: 1.5rem;
-        position: relative;
-        margin-bottom: -2rem;
-      }
+      .hero { grid-template-columns: 1fr; padding: 5rem 1.5rem 4rem; min-height: auto; gap: 3rem; }
+      .hero-meta { left: 1.5rem; top: 1.5rem; position: relative; margin-bottom: -2rem; }
       .hero::before { display: none; }
       .book-stage { padding: 1rem; }
-      .book-cover { max-width: 260px; transform: rotate(0deg); }
-      .scroll-down { display: none; }
-      .methods, .divider, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-      .methods { padding-top: 1rem; padding-bottom: 4rem; }
-      .divider { padding-top: 3rem; padding-bottom: 2rem; }
-      .divider-ornament::before,
-      .divider-ornament::after { width: 30px; }
+      .book3d { --bw: 235px; --bh: 352px; --bd: 34px; transform: rotateY(-20deg) rotateX(2deg); }
+      @keyframes book-in {
+        from { opacity: 0; transform: rotateY(-20deg) rotateX(2deg) translateY(40px); }
+        to   { opacity: 1; transform: rotateY(-20deg) rotateX(2deg) translateY(0); }
+      }
       .pullquote { font-size: 1.15rem; padding-left: 1.25rem; }
       .cta-row { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
       footer { padding-top: 3rem; padding-bottom: 3rem; }
@@ -736,9 +533,7 @@
 <body>
   <main>
 
-    <!-- ================================================ -->
-    <!-- SECTION 1: BOOK + INFO                            -->
-    <!-- ================================================ -->
+    <!-- ================= SECCIÓN 1: LIBRO ================= -->
     <section class="hero">
       <div class="hero-meta">
         <span>◆</span> Edición Independiente · 2026
@@ -746,54 +541,50 @@
 
       <div class="book-stage">
         <!--
-          REEMPLAZA esta imagen por la portada real del libro.
-          Sube tu portada y cambia src="" por el archivo (ej: src="portada.jpg").
-          Si no tienes la portada subida todavía, esto muestra un placeholder estilizado.
+          PORTADA: el archivo debe llamarse EXACTAMENTE "portada.jpg"
+          (minúsculas) y estar en la raíz del repositorio.
+          Si tu archivo es .png, cambia "portada.jpg" por "portada.png".
         -->
-        <div class="book-cover">
-          <img src="portada.jpg" alt="Cartas a mi Padre Desaparecido" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <div class="book-cover-placeholder" style="display:none;">
-            <div class="ornament">◆ ◆ ◆</div>
-            <div class="title">Cartas a mi<br>Padre<br>Desaparecido</div>
-            <div class="author">Carlos Zapata</div>
+        <div class="book3d">
+          <div class="face front">
+            <img src="portada.jpg" alt="Cartas a mi Padre Desaparecido" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="book-cover-placeholder">
+              <div class="ornament">◆ ◆ ◆</div>
+              <div class="title">Cartas a mi<br>Padre<br>Desaparecido</div>
+              <div class="author">Carlos Zapata</div>
+            </div>
           </div>
+          <div class="face back"></div>
+          <div class="face pages"></div>
+          <div class="face spine"></div>
+          <div class="face top"></div>
+          <div class="face bottom"></div>
         </div>
       </div>
 
       <div class="hero-text">
         <div class="eyebrow">Testimonio · 1998 — 2024</div>
-
         <h1>Cartas a mi <em>padre</em> desaparecido</h1>
-
         <div class="author-line">Carlos Zapata</div>
-
         <p class="lede">
           Cuarenta y cinco cartas escritas a lo largo de veintiocho años a un padre desaparecido por la guerrilla en Colombia en 1998. Un testimonio que cruza la pérdida, la memoria y la búsqueda.
         </p>
-
         <blockquote class="pullquote">
           Este libro es gratuito. Quien quiera, puede descargarlo. Quien decida apoyarlo, contribuye a la creación y adecuación de un espacio de memoria para las familias de personas desaparecidas en Caquetá.
         </blockquote>
-
         <div class="cta-row">
           <a href="#apoyar" class="cta-primary">Quiero apoyar el proyecto</a>
           <a href="https://drive.google.com/file/d/13fI3f5Q4tjE6u7z_vDE_yneNyfdB2R6l/view" target="_blank" class="cta-secondary">Descargar el libro</a>
         </div>
       </div>
-
-      <a href="#apoyar" class="scroll-down">Continuar</a>
     </section>
 
-    <!-- ================================================ -->
-    <!-- DIVIDER                                            -->
-    <!-- ================================================ -->
+    <!-- ================= DIVISOR ================= -->
     <div class="divider">
       <div class="divider-ornament reveal">cómo apoyar</div>
     </div>
 
-    <!-- ================================================ -->
-    <!-- SECTION 2: SUPPORT METHODS                        -->
-    <!-- ================================================ -->
+    <!-- ================= SECCIÓN 2: MÉTODOS ================= -->
     <section class="methods" id="apoyar">
       <div class="methods-header reveal">
         <div class="methods-eyebrow">Cinco caminos</div>
@@ -805,13 +596,11 @@
 
       <div class="methods-grid">
 
-        <!-- ========== PAYPAL ========== -->
         <div class="method-card reveal">
           <div class="method-number">i.</div>
           <div class="method-name">PayPal</div>
           <div class="method-region">Internacional</div>
           <div class="qr-frame">
-            <!-- REEMPLAZA src="qr-paypal.png" por el archivo real cuando lo tengas -->
             <img src="qr-paypal.png" alt="QR PayPal" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="qr-placeholder" style="display:none;">
               <span>◇</span>
@@ -821,7 +610,6 @@
           <p class="method-instruction">Escanea el código o visita tu enlace personal de PayPal.me</p>
         </div>
 
-        <!-- ========== BIZUM ========== -->
         <div class="method-card reveal">
           <div class="method-number">ii.</div>
           <div class="method-name">Bizum</div>
@@ -833,13 +621,11 @@
           <p class="method-instruction">Envía tu aporte desde tu app bancaria al número indicado.</p>
         </div>
 
-        <!-- ========== NEQUI ========== -->
         <div class="method-card reveal">
-          <div class="method-name" style="margin-top: 1rem;">Nequi</div>
-          <div class="method-number" style="order: -1;">iii.</div>
+          <div class="method-number">iii.</div>
+          <div class="method-name">Nequi</div>
           <div class="method-region">Colombia</div>
           <div class="qr-frame">
-            <!-- REEMPLAZA src="qr-nequi.png" por el archivo real cuando lo tengas -->
             <img src="qr-nequi.png" alt="QR Nequi" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="qr-placeholder" style="display:none;">
               <span>◇</span>
@@ -849,7 +635,6 @@
           <p class="method-instruction">Escanea desde la app de Nequi o envía al número <strong>311 451 7647</strong></p>
         </div>
 
-        <!-- ========== SANTANDER ========== -->
         <div class="method-card reveal">
           <div class="method-number">iv.</div>
           <div class="method-name">Santander</div>
@@ -861,7 +646,6 @@
           <p class="method-instruction">Transferencia SEPA a nombre de Carlos Zapata. Concepto: <em>Donativo libro</em></p>
         </div>
 
-        <!-- ========== BANCOLOMBIA ========== -->
         <div class="method-card reveal">
           <div class="method-number">v.</div>
           <div class="method-name">Bancolombia</div>
@@ -876,37 +660,22 @@
       </div>
     </section>
 
-    <!-- ================================================ -->
-    <!-- FOOTER                                             -->
-    <!-- ================================================ -->
+    <!-- ================= PIE ================= -->
     <footer>
-      <p>
-        Cada aporte ayuda a que la búsqueda continúe — para que ningún nombre se pierda en el silencio.
-      </p>
-      <div class="footer-signature">
-        Carlos Zapata <span>·</span> carloszapata.org <span>·</span> 2026
-      </div>
+      <p>Cada aporte ayuda a que la búsqueda continúe — para que ningún nombre se pierda en el silencio.</p>
+      <div class="footer-signature">Carlos Zapata <span>·</span> carloszapata.org <span>·</span> 2026</div>
     </footer>
 
   </main>
 
   <script>
-    // Reveal on scroll
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // Image error handlers (for placeholders)
-    document.querySelectorAll('.book-cover img, .qr-frame img').forEach(img => {
-      if (img.complete && img.naturalHeight === 0) {
-        img.dispatchEvent(new Event('error'));
-      }
+    document.querySelectorAll('.book3d .front img, .qr-frame img').forEach(img => {
+      if (img.complete && img.naturalHeight === 0) img.dispatchEvent(new Event('error'));
     });
   </script>
 </body>
